@@ -14,7 +14,7 @@
 
 body {
     margin: 0;
-    padding: 0;
+    padding: 20px 0;
     background: linear-gradient(270deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
     background-size: 400% 400%;
     animation: rainbowBg 8s ease infinite;
@@ -22,7 +22,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 @keyframes rainbowBg {
@@ -139,6 +140,25 @@ h1 {
 .btn-secondary:active {
     transform: translateY(6px);
     box-shadow: 0 0px 0px #2f3542;
+}
+
+.btn-json {
+    background: #2ed573;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: 900;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 0px #10ac84;
+    transition: all 0.2s;
+    margin: 5px;
+}
+
+.btn-json:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0px #10ac84;
 }
 
 .status-bar {
@@ -379,14 +399,28 @@ h1 {
     box-shadow: 0 0 10px rgba(55, 66, 250, 0.3);
 }
 
+.leaderboard-wrapper {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 4px dashed #dfe4ea;
+}
+
+.json-controls {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f1f2f6;
+    border-radius: 15px;
+    display: inline-block;
+}
+
 .leaderboard-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 30px;
     background: white;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-top: 15px;
 }
 
 .leaderboard-table th, .leaderboard-table td {
@@ -429,13 +463,33 @@ h1 {
         <div id="door-right" class="door"></div>
     </div>
 
+    <input type="file" id="json-upload" accept=".json" style="display:none;" onchange="importJSON(event)">
+
     <div id="start-screen" class="screen active-screen">
         <h1>חידון המילים באנגלית</h1>
         <div class="credits">נוצר על ידי עוז וברק טייבלום</div>
         <br><br>
         <button class="btn-primary" onclick="startGame()">שחקו עכשיו!</button>
-        <br>
-        <button class="btn-secondary" onclick="showLeaderboardScreen()">טבלת ניצחונות</button>
+        
+        <div class="leaderboard-wrapper">
+            <h2 style="color: #3742fa;">🏆 טבלת האלופים 🏆</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>מקום</th>
+                        <th>שם</th>
+                        <th>ציון</th>
+                    </tr>
+                </thead>
+                <tbody class="leaderboard-body">
+                </tbody>
+            </table>
+            
+            <div class="json-controls">
+                <button class="btn-json" onclick="exportJSON()">הורד קובץ JSON (גיבוי)</button>
+                <button class="btn-json" onclick="document.getElementById('json-upload').click()">טען קובץ JSON (סנכרון)</button>
+            </div>
+        </div>
     </div>
 
     <div id="game-screen" class="screen">
@@ -454,30 +508,32 @@ h1 {
         <div class="end-score">הציון שלכם: <span id="final-score-display">0</span> מתוך 100!</div>
         
         <div class="save-score-container" id="save-section">
-            <input type="text" id="player-name" placeholder="הכנס שם לשמירה...">
+            <input type="text" id="player-name" placeholder="הכנס שם לשמירה..." autocomplete="off">
             <br>
             <button class="btn-secondary" style="background:#2ed573;" onclick="saveScore()">שמור לטבלת הניצחונות</button>
         </div>
 
         <button class="btn-primary" onclick="startGame()">שחקו שוב</button>
-        <button class="btn-secondary" onclick="showLeaderboardScreen()">טבלת ניצחונות</button>
-    </div>
 
-    <div id="leaderboard-screen" class="screen">
-        <h1>טבלת ניצחונות</h1>
-        <table class="leaderboard-table">
-            <thead>
-                <tr>
-                    <th>מקום</th>
-                    <th>שם</th>
-                    <th>ציון</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard-body">
-            </tbody>
-        </table>
-        <button class="btn-primary" onclick="startGame()">משחק חדש</button>
-        <button class="btn-secondary" onclick="switchScreen('start-screen')">חזרה לתפריט</button>
+        <div class="leaderboard-wrapper">
+            <h2 style="color: #3742fa;">🏆 טבלת האלופים 🏆</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>מקום</th>
+                        <th>שם</th>
+                        <th>ציון</th>
+                    </tr>
+                </thead>
+                <tbody class="leaderboard-body">
+                </tbody>
+            </table>
+            
+            <div class="json-controls">
+                <button class="btn-json" onclick="exportJSON()">הורד קובץ JSON (גיבוי)</button>
+                <button class="btn-json" onclick="document.getElementById('json-upload').click()">טען קובץ JSON (סנכרון)</button>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -675,6 +731,7 @@ function finishGame() {
     playTone(1046.50, 'sine', 0.8, 0.6, 0.4);
     document.body.className = 'body-party';
     document.getElementById('final-score-display').innerText = currentScorePercentage;
+    renderLeaderboards();
     switchScreen('end-screen');
 }
 
@@ -691,42 +748,4 @@ function saveScore() {
     let leaderboard = JSON.parse(localStorage.getItem('englishQuizLB')) || [];
     leaderboard.push({ name: name, score: currentScorePercentage });
     
-    leaderboard.sort((a, b) => b.score - a.score);
     
-    localStorage.setItem('englishQuizLB', JSON.stringify(leaderboard));
-    
-    document.getElementById('save-section').style.display = 'none';
-    showLeaderboardScreen();
-}
-
-function showLeaderboardScreen() {
-    const leaderboard = JSON.parse(localStorage.getItem('englishQuizLB')) || [];
-    const tbody = document.getElementById('leaderboard-body');
-    tbody.innerHTML = '';
-    
-    if (leaderboard.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3">אין עדיין ניצחונות. היו הראשונים!</td></tr>';
-    } else {
-        leaderboard.slice(0, 10).forEach((entry, index) => {
-            const tr = document.createElement('tr');
-            let rankClass = '';
-            let rankIcon = index + 1;
-            if (index === 0) { rankClass = 'rank-1'; rankIcon = '🥇'; }
-            if (index === 1) { rankClass = 'rank-2'; rankIcon = '🥈'; }
-            if (index === 2) { rankClass = 'rank-3'; rankIcon = '🥉'; }
-            
-            tr.innerHTML = `
-                <td class="${rankClass}">${rankIcon}</td>
-                <td>${entry.name}</td>
-                <td>${entry.score}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-    
-    switchScreen('leaderboard-screen');
-}
-</script>
-
-</body>
-</html>
