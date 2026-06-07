@@ -408,7 +408,6 @@ let score = 0;
 const pointsPerQuestion = 1000;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let bgmInterval;
 
 function playTone(freq, type, duration, startTime, vol) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -422,27 +421,6 @@ function playTone(freq, type, duration, startTime, vol) {
     gain.connect(audioCtx.destination);
     osc.start(audioCtx.currentTime + startTime);
     osc.stop(audioCtx.currentTime + startTime + duration);
-}
-
-const bgmNotes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63, 196.00];
-let bgmIndex = 0;
-
-function stepBGM() {
-    playTone(bgmNotes[bgmIndex], 'square', 0.15, 0, 0.03);
-    bgmIndex = (bgmIndex + 1) % bgmNotes.length;
-}
-
-function startBGM() {
-    stopBGM();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    bgmInterval = setInterval(stepBGM, 200);
-}
-
-function stopBGM() {
-    if (bgmInterval) {
-        clearInterval(bgmInterval);
-        bgmInterval = null;
-    }
 }
 
 function playSuccessSound() {
@@ -478,7 +456,7 @@ function shuffleArray(array) {
 }
 
 function startGame() {
-    startBGM();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     gameWords = shuffleArray(vocabulary);
     currentQuestionIndex = 0;
     score = 0;
@@ -572,7 +550,6 @@ function updateScoreDisplay() {
 }
 
 function finishGame() {
-    stopBGM();
     playTone(523.25, 'sine', 0.2, 0, 0.4);
     playTone(659.25, 'sine', 0.2, 0.2, 0.4);
     playTone(783.99, 'sine', 0.2, 0.4, 0.4);
