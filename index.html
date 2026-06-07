@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חידון אנגלית - עוז וברק טייבלום</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+#game-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.credits {
+    font-size: 16px;
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+#score-board {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #e67e22;
+}
+
+#question {
+    font-size: 26px;
+    margin-bottom: 25px;
+    color: #2980b9;
+    font-weight: bold;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+button {
+    padding: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+.correct {
+    background-color: #27ae60 !important;
+}
+
+.wrong {
+    background-color: #c0392b !important;
+}
+
+#end-screen {
+    display: none;
+}
+
+#end-screen h2 {
+    color: #27ae60;
+    font-size: 32px;
+}
+
+#end-screen p {
+    font-size: 24px;
+    color: #2c3e50;
+}
+
+#restart-btn {
+    margin-top: 20px;
+    background-color: #8e44ad;
+}
+
+#restart-btn:hover {
+    background-color: #732d91;
+}
+</style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>חידון אנגלית</h1>
+    <div class="credits">נוצר על ידי עוז וברק טייבלום</div>
+    
+    <div id="quiz-screen">
+        <div id="score-board">נקודות: <span id="score">0</span></div>
+        <div id="question"></div>
+        <div class="options" id="options"></div>
+    </div>
+
+    <div id="end-screen">
+        <h2>כל הכבוד! סיימתם!</h2>
+        <p>הציון הסופי שלכם: <span id="final-score"></span></p>
+        <button id="restart-btn" onclick="startGame()">שחקו שוב</button>
+    </div>
+</div>
+
+<script>
+const questions = [
+    { q: "איך אומרים 'רכבת תחתית' באנגלית?", options: ["Subway", "Supermarket", "Spaceship", "Soldier"], a: "Subway" },
+    { q: "מה הפירוש של המילה 'Volunteer'?", options: ["מתנדב", "מפלגה", "נהר", "שורה"], a: "מתנדב" },
+    { q: "איך אומרים 'טכנולוגיה' באנגלית?", options: ["Technology", "Society", "Puzzle", "River"], a: "Technology" },
+    { q: "מה הפירוש של המילה 'Vote'?", options: ["להצביע בבחירות", "להשתתף", "לבד", "בזמן"], a: "להצביע בבחירות" },
+    { q: "איך אומרים 'סופרמרקט' באנגלית?", options: ["Supermarket", "Push", "Purse", "Row"], a: "Supermarket" }
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+
+const successAudio = new Audio('success.mp3');
+const failAudio = new Audio('fail.mp3');
+
+function startGame() {
+    currentQuestionIndex = 0;
+    score = 0;
+    document.getElementById("score").innerText = score;
+    document.getElementById("quiz-screen").style.display = "block";
+    document.getElementById("end-screen").style.display = "none";
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const currentQ = questions[currentQuestionIndex];
+    document.getElementById("question").innerText = currentQ.q;
+    const optionsContainer = document.getElementById("options");
+    optionsContainer.innerHTML = "";
+    
+    currentQ.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(opt, btn);
+        optionsContainer.appendChild(btn);
+    });
+}
+
+function checkAnswer(selectedOption, selectedButton) {
+    const correctAnswer = questions[currentQuestionIndex].a;
+    const allButtons = document.querySelectorAll(".options button");
+    
+    allButtons.forEach(b => b.disabled = true);
+
+    if (selectedOption === correctAnswer) {
+        selectedButton.classList.add("correct");
+        score += 20;
+        document.getElementById("score").innerText = score;
+        successAudio.play().catch(() => {});
+    } else {
+        selectedButton.classList.add("wrong");
+        allButtons.forEach(b => {
+            if (b.innerText === correctAnswer) {
+                b.classList.add("correct");
+            }
+        });
+        failAudio.play().catch(() => {});
+    }
+
+    setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            endGame();
+        }
+    }, 1500);
+}
+
+function endGame() {
+    document.getElementById("quiz-screen").style.display = "none";
+    document.getElementById("end-screen").style.display = "block";
+    document.getElementById("final-score").innerText = score;
+}
+
+window.onload = startGame;
+</script>
+
+</body>
+  </html>
+  
