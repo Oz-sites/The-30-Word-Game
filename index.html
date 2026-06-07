@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>חידון המילים - עוז וברק טייבלום</title>
+<title>חידון המילים באנגלית - עוז וברק טייבלום</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap');
 
@@ -96,7 +96,7 @@ h1 {
     100% { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
-#start-btn, #restart-btn {
+.btn-primary {
     background: #ff4757;
     color: white;
     border: 4px solid #3742fa;
@@ -108,6 +108,7 @@ h1 {
     box-shadow: 0 8px 0px #3742fa;
     transition: all 0.2s;
     animation: extremePulse 1.5s infinite;
+    margin: 10px;
 }
 
 @keyframes extremePulse {
@@ -116,9 +117,28 @@ h1 {
     100% { transform: scale(1); }
 }
 
-#start-btn:active, #restart-btn:active {
+.btn-primary:active {
     transform: translateY(8px);
     box-shadow: 0 0px 0px #3742fa;
+}
+
+.btn-secondary {
+    background: #3742fa;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 24px;
+    font-weight: 900;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 6px 0px #2f3542;
+    transition: all 0.2s;
+    margin: 10px;
+}
+
+.btn-secondary:active {
+    transform: translateY(6px);
+    box-shadow: 0 0px 0px #2f3542;
 }
 
 .status-bar {
@@ -331,6 +351,73 @@ h1 {
 .doors-closed #door-right {
     transform: translateX(0);
 }
+
+.save-score-container {
+    background: #f1f2f6;
+    padding: 20px;
+    border-radius: 20px;
+    border: 3px dashed #ced6e0;
+    margin-bottom: 30px;
+}
+
+#player-name {
+    width: 100%;
+    max-width: 300px;
+    padding: 15px;
+    font-size: 24px;
+    border: 3px solid #70a1ff;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 700;
+    color: #2f3542;
+    outline: none;
+}
+
+#player-name:focus {
+    border-color: #3742fa;
+    box-shadow: 0 0 10px rgba(55, 66, 250, 0.3);
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.leaderboard-table th, .leaderboard-table td {
+    padding: 15px;
+    text-align: center;
+    font-size: 22px;
+    border-bottom: 2px solid #f1f2f6;
+}
+
+.leaderboard-table th {
+    background: #3742fa;
+    color: white;
+    font-weight: 900;
+}
+
+.leaderboard-table tr:last-child td {
+    border-bottom: none;
+}
+
+.leaderboard-table tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+
+.leaderboard-table td {
+    color: #2f3542;
+    font-weight: 700;
+}
+
+.rank-1 { color: #f1c40f !important; font-size: 28px !important; }
+.rank-2 { color: #95a5a6 !important; font-size: 26px !important; }
+.rank-3 { color: #d35400 !important; font-size: 24px !important; }
 </style>
 </head>
 <body>
@@ -343,16 +430,18 @@ h1 {
     </div>
 
     <div id="start-screen" class="screen active-screen">
-        <h1>חידון המילים המטורף!</h1>
+        <h1>חידון המילים באנגלית</h1>
         <div class="credits">נוצר על ידי עוז וברק טייבלום</div>
         <br><br>
-        <button id="start-btn" onclick="startGame()">שחקו עכשיו!!!</button>
+        <button class="btn-primary" onclick="startGame()">שחקו עכשיו!</button>
+        <br>
+        <button class="btn-secondary" onclick="showLeaderboardScreen()">טבלת ניצחונות</button>
     </div>
 
     <div id="game-screen" class="screen">
         <div class="status-bar">
             <div>שאלה: <span id="question-counter">1/30</span></div>
-            <div>נקודות: <span id="score-display">0</span></div>
+            <div>ציון: <span id="score-display">0</span></div>
         </div>
         <div id="quiz-content">
             <div id="question-text">Word</div>
@@ -361,9 +450,34 @@ h1 {
     </div>
 
     <div id="end-screen" class="screen">
-        <div class="end-title">מטורף!!!</div>
-        <div class="end-score">השגתם <span id="final-score-display">0</span> נקודות!!!</div>
-        <button id="restart-btn" onclick="startGame()">עוד פעם!!!</button>
+        <div class="end-title">כל הכבוד!</div>
+        <div class="end-score">הציון שלכם: <span id="final-score-display">0</span> מתוך 100!</div>
+        
+        <div class="save-score-container" id="save-section">
+            <input type="text" id="player-name" placeholder="הכנס שם לשמירה...">
+            <br>
+            <button class="btn-secondary" style="background:#2ed573;" onclick="saveScore()">שמור לטבלת הניצחונות</button>
+        </div>
+
+        <button class="btn-primary" onclick="startGame()">שחקו שוב</button>
+        <button class="btn-secondary" onclick="showLeaderboardScreen()">טבלת ניצחונות</button>
+    </div>
+
+    <div id="leaderboard-screen" class="screen">
+        <h1>טבלת ניצחונות</h1>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>מקום</th>
+                    <th>שם</th>
+                    <th>ציון</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+            </tbody>
+        </table>
+        <button class="btn-primary" onclick="startGame()">משחק חדש</button>
+        <button class="btn-secondary" onclick="switchScreen('start-screen')">חזרה לתפריט</button>
     </div>
 
 </div>
@@ -404,8 +518,8 @@ const vocabulary = [
 
 let gameWords = [];
 let currentQuestionIndex = 0;
-let score = 0;
-const pointsPerQuestion = 1000;
+let correctAnswersCount = 0;
+let currentScorePercentage = 0;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -459,7 +573,10 @@ function startGame() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     gameWords = shuffleArray(vocabulary);
     currentQuestionIndex = 0;
-    score = 0;
+    correctAnswersCount = 0;
+    currentScorePercentage = 0;
+    document.getElementById('player-name').value = '';
+    document.getElementById('save-section').style.display = 'block';
     updateScoreDisplay();
     switchScreen('game-screen');
     renderQuestion();
@@ -513,8 +630,7 @@ function handleAnswer(selectedAnswer, correctAnswer, selectedBtn) {
 
     if (selectedAnswer === correctAnswer) {
         selectedBtn.classList.add('correct-ans');
-        score += pointsPerQuestion;
-        updateScoreDisplay();
+        correctAnswersCount++;
         playSuccessSound();
         document.body.classList.add('body-party');
     } else {
@@ -527,6 +643,9 @@ function handleAnswer(selectedAnswer, correctAnswer, selectedBtn) {
         playFailSound();
         document.body.classList.add('body-shake');
     }
+
+    currentScorePercentage = Math.round((correctAnswersCount / gameWords.length) * 100);
+    updateScoreDisplay();
 
     setTimeout(() => {
         currentQuestionIndex++;
@@ -544,7 +663,7 @@ function handleAnswer(selectedAnswer, correctAnswer, selectedBtn) {
 
 function updateScoreDisplay() {
     const scoreEl = document.getElementById('score-display');
-    scoreEl.innerText = score;
+    scoreEl.innerText = currentScorePercentage;
     scoreEl.style.transform = 'scale(1.5)';
     setTimeout(() => { scoreEl.style.transform = 'scale(1)'; }, 200);
 }
@@ -555,8 +674,57 @@ function finishGame() {
     playTone(783.99, 'sine', 0.2, 0.4, 0.4);
     playTone(1046.50, 'sine', 0.8, 0.6, 0.4);
     document.body.className = 'body-party';
-    document.getElementById('final-score-display').innerText = score;
+    document.getElementById('final-score-display').innerText = currentScorePercentage;
     switchScreen('end-screen');
+}
+
+function saveScore() {
+    const nameInput = document.getElementById('player-name');
+    const name = nameInput.value.trim();
+    
+    if (name === "") {
+        nameInput.style.borderColor = "#ff4757";
+        setTimeout(() => nameInput.style.borderColor = "#70a1ff", 1000);
+        return;
+    }
+
+    let leaderboard = JSON.parse(localStorage.getItem('englishQuizLB')) || [];
+    leaderboard.push({ name: name, score: currentScorePercentage });
+    
+    leaderboard.sort((a, b) => b.score - a.score);
+    
+    localStorage.setItem('englishQuizLB', JSON.stringify(leaderboard));
+    
+    document.getElementById('save-section').style.display = 'none';
+    showLeaderboardScreen();
+}
+
+function showLeaderboardScreen() {
+    const leaderboard = JSON.parse(localStorage.getItem('englishQuizLB')) || [];
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = '';
+    
+    if (leaderboard.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3">אין עדיין ניצחונות. היו הראשונים!</td></tr>';
+    } else {
+        leaderboard.slice(0, 10).forEach((entry, index) => {
+            const tr = document.createElement('tr');
+            let rankClass = '';
+            let rankIcon = index + 1;
+            if (index === 0) { rankClass = 'rank-1'; rankIcon = '🥇'; }
+            if (index === 1) { rankClass = 'rank-2'; rankIcon = '🥈'; }
+            if (index === 2) { rankClass = 'rank-3'; rankIcon = '🥉'; }
+            
+            tr.innerHTML = `
+                <td class="${rankClass}">${rankIcon}</td>
+                <td>${entry.name}</td>
+                <td>${entry.score}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+    
+    switchScreen('leaderboard-screen');
 }
 </script>
 
