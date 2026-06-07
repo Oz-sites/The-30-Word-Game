@@ -3,206 +3,371 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>חידון אנגלית - עוז וברק טייבלום</title>
+<title>חידון המילים הגדול - עוז וברק טייבלום</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f6;
-    text-align: center;
-    margin: 0;
-    padding: 0;
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap');
+
+* {
+    box-sizing: border-box;
+    font-family: 'Rubik', sans-serif;
 }
 
-#game-container {
-    max-width: 600px;
-    margin: 40px auto;
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#app-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    width: 90%;
+    max-width: 700px;
+    border-radius: 25px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
 h1 {
-    color: #2c3e50;
-    margin-bottom: 5px;
+    color: #ff4757;
+    font-size: 42px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 0px #ffeaa7;
 }
 
 .credits {
-    font-size: 16px;
-    color: #7f8c8d;
+    font-size: 18px;
+    color: #2f3542;
+    background: #f1f2f6;
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
     margin-bottom: 30px;
-    font-weight: bold;
+    font-weight: 700;
+    border: 2px dashed #ced6e0;
 }
 
-#score-board {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #e67e22;
+.screen {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-#question {
-    font-size: 26px;
-    margin-bottom: 25px;
-    color: #2980b9;
-    font-weight: bold;
+.active-screen {
+    display: block;
 }
 
-.options {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-button {
-    padding: 15px;
-    font-size: 20px;
-    cursor: pointer;
-    border: none;
-    border-radius: 10px;
-    background-color: #3498db;
+#start-btn, #restart-btn {
+    background: linear-gradient(45deg, #ff6b81, #ff4757);
     color: white;
-    font-weight: bold;
-    transition: background-color 0.2s;
+    border: none;
+    padding: 15px 50px;
+    font-size: 28px;
+    font-weight: 900;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 15px rgba(255, 71, 87, 0.4);
+    transition: all 0.3s;
 }
 
-button:hover {
-    background-color: #2980b9;
+#start-btn:hover, #restart-btn:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 12px 20px rgba(255, 71, 87, 0.6);
 }
 
-button:disabled {
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    background: #dfe4ea;
+    padding: 15px 25px;
+    border-radius: 15px;
+    color: #2f3542;
+}
+
+#score-display {
+    color: #2ed573;
+    font-size: 26px;
+}
+
+#question-text {
+    font-size: 48px;
+    color: #3742fa;
+    margin-bottom: 40px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    direction: ltr;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 500px) {
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.option-btn {
+    background: #ffffff;
+    border: 3px solid #70a1ff;
+    color: #2f3542;
+    padding: 20px;
+    font-size: 22px;
+    font-weight: 700;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.05);
+}
+
+.option-btn:hover:not(:disabled) {
+    background: #70a1ff;
+    color: white;
+    transform: translateY(-3px);
+}
+
+.option-btn:disabled {
     cursor: not-allowed;
 }
 
-.correct {
-    background-color: #27ae60 !important;
+.correct-ans {
+    background: #2ed573 !important;
+    border-color: #2ed573 !important;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(46, 213, 115, 0.6);
 }
 
-.wrong {
-    background-color: #c0392b !important;
+.wrong-ans {
+    background: #ff4757 !important;
+    border-color: #ff4757 !important;
+    color: white !important;
+    animation: shake 0.4s;
 }
 
-#end-screen {
-    display: none;
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
 }
 
-#end-screen h2 {
-    color: #27ae60;
-    font-size: 32px;
+.end-title {
+    font-size: 48px;
+    color: #eccc68;
+    text-shadow: 2px 2px 0px #ff7f50;
+    margin-bottom: 20px;
 }
 
-#end-screen p {
-    font-size: 24px;
-    color: #2c3e50;
-}
-
-#restart-btn {
-    margin-top: 20px;
-    background-color: #8e44ad;
-}
-
-#restart-btn:hover {
-    background-color: #732d91;
+.end-score {
+    font-size: 36px;
+    color: #2f3542;
+    margin-bottom: 40px;
 }
 </style>
 </head>
 <body>
 
-<div id="game-container">
-    <h1>חידון אנגלית</h1>
-    <div class="credits">נוצר על ידי עוז וברק טייבלום</div>
+<div id="app-container">
     
-    <div id="quiz-screen">
-        <div id="score-board">נקודות: <span id="score">0</span></div>
-        <div id="question"></div>
-        <div class="options" id="options"></div>
+    <div id="start-screen" class="screen active-screen">
+        <h1>חידון המילים הגדול!</h1>
+        <div class="credits">נוצר על ידי עוז וברק טייבלום</div>
+        <br><br>
+        <button id="start-btn" onclick="startGame()">שחקו עכשיו!</button>
     </div>
 
-    <div id="end-screen">
-        <h2>כל הכבוד! סיימתם!</h2>
-        <p>הציון הסופי שלכם: <span id="final-score"></span></p>
+    <div id="game-screen" class="screen">
+        <div class="status-bar">
+            <div>שאלה: <span id="question-counter">1/30</span></div>
+            <div>נקודות: <span id="score-display">0</span></div>
+        </div>
+        <div id="question-text">Word</div>
+        <div class="options-grid" id="options-container"></div>
+    </div>
+
+    <div id="end-screen" class="screen">
+        <div class="end-title">כל הכבוד!</div>
+        <div class="end-score">צברתם <span id="final-score-display">0</span> נקודות!</div>
         <button id="restart-btn" onclick="startGame()">שחקו שוב</button>
     </div>
+
 </div>
 
 <script>
-const questions = [
-    { q: "איך אומרים 'רכבת תחתית' באנגלית?", options: ["Subway", "Supermarket", "Spaceship", "Soldier"], a: "Subway" },
-    { q: "מה הפירוש של המילה 'Volunteer'?", options: ["מתנדב", "מפלגה", "נהר", "שורה"], a: "מתנדב" },
-    { q: "איך אומרים 'טכנולוגיה' באנגלית?", options: ["Technology", "Society", "Puzzle", "River"], a: "Technology" },
-    { q: "מה הפירוש של המילה 'Vote'?", options: ["להצביע בבחירות", "להשתתף", "לבד", "בזמן"], a: "להצביע בבחירות" },
-    { q: "איך אומרים 'סופרמרקט' באנגלית?", options: ["Supermarket", "Push", "Purse", "Row"], a: "Supermarket" }
+const vocabulary = [
+    { en: "Subway", he: "רכבת תחתית" },
+    { en: "Supermarket", he: "סופרמרקט" },
+    { en: "Swimming pool", he: "בריכת שחייה" },
+    { en: "Volunteer", he: "מתנדב" },
+    { en: "Vote", he: "להצביע בבחירות" },
+    { en: "Society", he: "חברה" },
+    { en: "Soldier", he: "חייל" },
+    { en: "Railway station", he: "תחנת רכבת" },
+    { en: "Technology", he: "טכנולוגיה" },
+    { en: "Source (of)", he: "מקור (של)" },
+    { en: "Spaceship", he: "חללית" },
+    { en: "Role", he: "תפקיד" },
+    { en: "Row", he: "שורה" },
+    { en: "River", he: "נהר" },
+    { en: "Tear", he: "דמעה" },
+    { en: "Major", he: "גדול, חשוב" },
+    { en: "Majority (of)", he: "מרבית, רוב" },
+    { en: "Principal", he: "מנהל בית ספר" },
+    { en: "Purse", he: "תיק, ארנק" },
+    { en: "Push", he: "דחיפה" },
+    { en: "Puzzle", he: "פאזל, חידה" },
+    { en: "On one's own", he: "לבד, בעצמו" },
+    { en: "On time", he: "בזמן" },
+    { en: "Once in a while", he: "מדי פעם" },
+    { en: "Online", he: "באינטרנט" },
+    { en: "Option", he: "ברירה, אפשרות" },
+    { en: "Overseas", he: "מעבר לים, בחו\"ל" },
+    { en: "Participate", he: "להשתתף" },
+    { en: "Particular", he: "מסוים" },
+    { en: "Party", he: "מפלגה" }
 ];
 
+let gameWords = [];
 let currentQuestionIndex = 0;
 let score = 0;
+const pointsPerQuestion = 10;
 
-const successAudio = new Audio('success.mp3');
-const failAudio = new Audio('fail.mp3');
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-function startGame() {
-    currentQuestionIndex = 0;
-    score = 0;
-    document.getElementById("score").innerText = score;
-    document.getElementById("quiz-screen").style.display = "block";
-    document.getElementById("end-screen").style.display = "none";
-    loadQuestion();
+function playTone(freq, type, duration, startTime, vol) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + startTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime + startTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + startTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + startTime);
+    osc.stop(audioCtx.currentTime + startTime + duration);
 }
 
-function loadQuestion() {
-    const currentQ = questions[currentQuestionIndex];
-    document.getElementById("question").innerText = currentQ.q;
-    const optionsContainer = document.getElementById("options");
-    optionsContainer.innerHTML = "";
+function playSuccessSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    playTone(523.25, 'sine', 0.15, 0, 0.3);
+    playTone(659.25, 'sine', 0.15, 0.1, 0.3);
+    playTone(783.99, 'sine', 0.3, 0.2, 0.3);
+}
+
+function playFailSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    playTone(300, 'sawtooth', 0.2, 0, 0.2);
+    playTone(250, 'sawtooth', 0.4, 0.2, 0.2);
+}
+
+function switchScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+    document.getElementById(screenId).classList.add('active-screen');
+}
+
+function shuffleArray(array) {
+    let newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+}
+
+function startGame() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    gameWords = shuffleArray(vocabulary);
+    currentQuestionIndex = 0;
+    score = 0;
+    updateScoreDisplay();
+    switchScreen('game-screen');
+    renderQuestion();
+}
+
+function renderQuestion() {
+    document.getElementById('question-counter').innerText = `${currentQuestionIndex + 1}/${gameWords.length}`;
     
-    currentQ.options.forEach(opt => {
-        const btn = document.createElement("button");
+    const currentWord = gameWords[currentQuestionIndex];
+    document.getElementById('question-text').innerText = currentWord.en;
+
+    let options = [currentWord.he];
+    while (options.length < 4) {
+        const randomWord = vocabulary[Math.floor(Math.random() * vocabulary.length)].he;
+        if (!options.includes(randomWord)) {
+            options.push(randomWord);
+        }
+    }
+
+    options = shuffleArray(options);
+
+    const optionsContainer = document.getElementById('options-container');
+    optionsContainer.innerHTML = '';
+
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
         btn.innerText = opt;
-        btn.onclick = () => checkAnswer(opt, btn);
+        btn.onclick = () => handleAnswer(opt, currentWord.he, btn);
         optionsContainer.appendChild(btn);
     });
 }
 
-function checkAnswer(selectedOption, selectedButton) {
-    const correctAnswer = questions[currentQuestionIndex].a;
-    const allButtons = document.querySelectorAll(".options button");
-    
-    allButtons.forEach(b => b.disabled = true);
+function handleAnswer(selectedAnswer, correctAnswer, selectedBtn) {
+    const allBtns = document.querySelectorAll('.option-btn');
+    allBtns.forEach(btn => btn.disabled = true);
 
-    if (selectedOption === correctAnswer) {
-        selectedButton.classList.add("correct");
-        score += 20;
-        document.getElementById("score").innerText = score;
-        successAudio.play().catch(() => {});
+    if (selectedAnswer === correctAnswer) {
+        selectedBtn.classList.add('correct-ans');
+        score += pointsPerQuestion;
+        updateScoreDisplay();
+        playSuccessSound();
     } else {
-        selectedButton.classList.add("wrong");
-        allButtons.forEach(b => {
-            if (b.innerText === correctAnswer) {
-                b.classList.add("correct");
+        selectedBtn.classList.add('wrong-ans');
+        allBtns.forEach(btn => {
+            if (btn.innerText === correctAnswer) {
+                btn.classList.add('correct-ans');
             }
         });
-        failAudio.play().catch(() => {});
+        playFailSound();
     }
 
     setTimeout(() => {
         currentQuestionIndex++;
-        if (currentQuestionIndex < questions.length) {
-            loadQuestion();
+        if (currentQuestionIndex < gameWords.length) {
+            renderQuestion();
         } else {
-            endGame();
+            finishGame();
         }
     }, 1500);
 }
 
-function endGame() {
-    document.getElementById("quiz-screen").style.display = "none";
-    document.getElementById("end-screen").style.display = "block";
-    document.getElementById("final-score").innerText = score;
+function updateScoreDisplay() {
+    document.getElementById('score-display').innerText = score;
 }
 
-window.onload = startGame;
+function finishGame() {
+    document.getElementById('final-score-display').innerText = score;
+    switchScreen('end-screen');
+}
 </script>
 
 </body>
-  </html>
-  
+</html>
