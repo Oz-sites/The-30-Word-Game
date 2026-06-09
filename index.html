@@ -149,25 +149,6 @@ h1 {
     box-shadow: 0 0px 0px #2f3542;
 }
 
-.btn-json {
-    background: #2ed573;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 18px;
-    font-weight: 900;
-    border-radius: 15px;
-    cursor: pointer;
-    box-shadow: 0 4px 0px #10ac84;
-    transition: all 0.2s;
-    margin: 5px;
-}
-
-.btn-json:active {
-    transform: translateY(4px);
-    box-shadow: 0 0px 0px #10ac84;
-}
-
 .status-bar {
     display: flex;
     justify-content: space-between;
@@ -412,14 +393,6 @@ h1 {
     border-top: 4px dashed #dfe4ea;
 }
 
-.json-controls {
-    margin-top: 15px;
-    padding: 15px;
-    background: #f1f2f6;
-    border-radius: 15px;
-    display: inline-block;
-}
-
 .leaderboard-table {
     width: 100%;
     border-collapse: collapse;
@@ -470,8 +443,6 @@ h1 {
         <div id="door-right" class="door"></div>
     </div>
 
-    <input type="file" id="json-upload" accept=".json" style="display:none;" onchange="importJSON(event)">
-
     <div id="start-screen" class="screen active-screen">
         <h1>חידון המילים באנגלית</h1>
         <div class="credits">נוצר על ידי עוז וברק טייבלום</div>
@@ -494,11 +465,6 @@ h1 {
                 <tbody class="leaderboard-body">
                 </tbody>
             </table>
-            
-            <div class="json-controls">
-                <button class="btn-json" onclick="exportJSON()">הורד קובץ JSON (גיבוי)</button>
-                <button class="btn-json" onclick="document.getElementById('json-upload').click()">טען קובץ JSON (סנכרון)</button>
-            </div>
         </div>
     </div>
 
@@ -541,11 +507,6 @@ h1 {
                 <tbody class="leaderboard-body">
                 </tbody>
             </table>
-            
-            <div class="json-controls">
-                <button class="btn-json" onclick="exportJSON()">הורד קובץ JSON (גיבוי)</button>
-                <button class="btn-json" onclick="document.getElementById('json-upload').click()">טען קובץ JSON (סנכרון)</button>
-            </div>
         </div>
     </div>
 
@@ -590,20 +551,30 @@ let currentQuestionIndex = 0;
 let correctAnswersCount = 0;
 let currentScorePercentage = 0;
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
+
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
 
 function playTone(freq, type, duration, startTime, vol) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + startTime);
-    gain.gain.setValueAtTime(vol, audioCtx.currentTime + startTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + startTime + duration);
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + startTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime + startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + duration);
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime + startTime);
-    osc.stop(audioCtx.currentTime + startTime + duration);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + startTime);
+    osc.stop(ctx.currentTime + startTime + duration);
 }
 
 function playSuccessSound() {
@@ -639,7 +610,8 @@ function shuffleArray(array) {
 }
 
 function startGame() {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    getAudioContext();
+    
     gameWords = shuffleArray(vocabulary);
     currentQuestionIndex = 0;
     correctAnswersCount = 0;
@@ -750,4 +722,34 @@ function finishGame() {
 
 function saveScore() {
     const nameInput = document.getElementById('player-name');
-    con
+    const name = nameInput.value.trim();
+    
+    if (name === "") {
+        nameInput.style.borderColor = "#ff4757";
+        setTimeout(() => nameInput.style.borderColor = "#70a1ff", 1000);
+        return;
+    }
+
+    let leaderboard = JSON.parse(localStorage.getItem('englishQuizLB')) || [];
+    leaderboard.push({ name: name, score: currentScorePercentage });
+    
+    leaderboard.sort((a, b) => b.score - a.score);
+    
+    localStorage.setItem('englishQuizLB', JSON.stringify(leaderboard));
+    
+    document.getElementById('save-section').style.display = 'none';
+    renderLeaderboards();
+}
+
+function renderLeaderboards() {
+    const leaderboard = JSON.parse(localStorage.getItem('englishQuizLB')) || [];
+    const tbodies = document.querySelectorAll('.leaderboard-body');
+    
+    tbodies.forEach(tbody => {
+        tbody.innerHTML = '';
+        if (leaderboard.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3">אין עדיין ניצחונות בטבלה.</td></tr>';
+        } else {
+            leaderboard.slice(0, 10).forEach((entry, index) => {
+                const tr = document.createElement('tr');
+          
